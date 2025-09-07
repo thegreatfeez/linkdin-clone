@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { FaUser, FaImage, FaVideo, FaCalendarAlt, FaEdit, FaGlobeAmericas, FaThumbsUp, FaComment, FaRetweet, FaShare } from 'react-icons/fa';
-import { MdDescription } from "react-icons/md";
+import PostModal from "./PostModal";
+import { useState } from "react";
 
 const Container = styled.div`
   grid-area: main;
@@ -316,11 +317,33 @@ const SocialActions = styled.div`
 
 
 const Main = (props) => {
+  const [showModal, setShowModal] = useState("close");
+  
+  const handleClick = (e) => {  
+    e.preventDefault();
+    if (e.target !== e.currentTarget) {
+      return;
+    }
+    
+    switch (showModal) {
+      case "open":
+        setShowModal("close");
+        break;
+      case "close":
+        setShowModal("open");
+        break;
+      default:
+        setShowModal("close");
+        break;
+    }
+  };
+
+
   return <Container>
     <ShareBox>Share
     <div>
       <FaUser size={48} color="#666" style={{borderRadius: '50%', padding: '8px', backgroundColor: '#f0f0f0'}}/>
-     <button>Start a post</button>
+     <button onClick={handleClick}>Start a post</button>
      </div>
    
     <div>
@@ -388,6 +411,7 @@ const Main = (props) => {
 </SocialActions>
   </Article>
     </div>
+    <PostModal showModal={showModal} handleClick={handleClick}/>
   </Container>;
   
 };
