@@ -1,7 +1,10 @@
 import styled from "styled-components";
 import { FaUser, FaImage, FaVideo, FaCalendarAlt, FaEdit, FaGlobeAmericas, FaThumbsUp, FaComment, FaRetweet, FaShare } from 'react-icons/fa';
 import PostModal from "./PostModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import dummyPosts from "./dummyPosts";
+import { connect } from "react-redux";
+import { getArticlesAPI } from "../actions";
 
 const Container = styled.div`
   grid-area: main;
@@ -24,6 +27,7 @@ const ShareBox = styled(CommonCard)`
   color: #958b7b;
   margin: 0 0 8px;
   background: white;
+  
   div {
     button {
       outline: none;
@@ -44,10 +48,31 @@ const ShareBox = styled(CommonCard)`
         border-radius: 8px;
       }
     }
+    
     &:first-child {
       display: flex;
       align-items: center;
       padding: 8px 16px 0px 16px;
+      
+      img {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 8px;
+      }
+      
+      .user-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        padding: 8px;
+        background-color: #f0f0f0;
+        margin-right: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
       
       button {
         margin: 4px 0;
@@ -57,13 +82,13 @@ const ShareBox = styled(CommonCard)`
         border: 1px solid rgba(0, 0, 0, 0.15);
         background-color: white;
         text-align: left;
-        margin-left: 8px;
         
         &:hover {
           background-color: rgba(0, 0, 0, 0.05);
         }
       }
     }
+    
     &:nth-child(2) {
       display: flex;
       justify-content: space-evenly;
@@ -105,12 +130,6 @@ const Article = styled(CommonCard)`
   padding: 0;
   margin: 0 0 8px;
   overflow: visible;
-  img {
-    width: 100%;
-    height: auto;
-    border-radius: 5px;
-    margin-bottom: 8px;
-  }
 `;
 
 const SharedActor = styled.div`
@@ -120,12 +139,14 @@ const SharedActor = styled.div`
   margin-bottom: 8px;
   align-items: center;
   display: flex;
+  
   a {
     margin-right: 12px;
     flex-grow: 1;
     overflow: hidden;
     display: flex;
     text-decoration: none;
+    cursor: pointer;
 
     img {
       width: 48px;
@@ -133,6 +154,7 @@ const SharedActor = styled.div`
       border-radius: 50%;
       object-fit: cover;
     }
+    
     & > div {
       display: flex;
       flex-direction: column;
@@ -156,6 +178,7 @@ const SharedActor = styled.div`
       }
     }
   }
+  
   button {
     position: absolute;
     right: 12px;
@@ -167,6 +190,7 @@ const SharedActor = styled.div`
     color: rgba(0, 0, 0, 0.6);
   }
 `;
+
 const Description = styled.div`
   padding: 16px 16px 12px;
   overflow: hidden;
@@ -181,28 +205,6 @@ const Description = styled.div`
     color: #0a66c2;
     font-weight: 600;
   }
-  
-  ul {
-    margin: 8px 0;
-    padding-left: 20px;
-  }
-  
-  li {
-    margin: 4px 0;
-    list-style-type: disc;
-  }
-  
-  p {
-    margin: 8px 0;
-    
-    &:first-child {
-      margin-top: 0;
-    }
-    
-    &:last-child {
-      margin-bottom: 4px;
-    }
-  }
 `;
 
 const SharedImg = styled.div`
@@ -216,6 +218,7 @@ const SharedImg = styled.div`
   a {
     display: block;
     position: relative;
+    cursor: pointer;
     
     &:hover img {
       opacity: 0.95;
@@ -232,6 +235,7 @@ const SharedImg = styled.div`
     border-radius: 0;
   }
 `;
+
 const SocialCount = styled.ul`
   line-height: 1.3;
   display: flex;
@@ -278,6 +282,7 @@ const SocialCount = styled.ul`
     }
   }
 `;
+
 const SocialActions = styled.div`
   align-items: center;
   display: flex;
@@ -315,9 +320,27 @@ const SocialActions = styled.div`
   }
 `;
 
+const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  
+  & > img {
+    width: 30px;
+    height: 30px;
+    align-self: center;
+    margin: 20px 0;
+  }
+`;  
 
 const Main = (props) => {
   const [showModal, setShowModal] = useState("close");
+
+  useEffect(() => {
+    if (props.getArticles) {
+      props.getArticles();
+    }
+  }, [props.getArticles]);
   
   const handleClick = (e) => {  
     e.preventDefault();
@@ -338,82 +361,131 @@ const Main = (props) => {
     }
   };
 
-
-  return <Container>
-    <ShareBox>Share
-    <div>
-      <FaUser size={48} color="#666" style={{borderRadius: '50%', padding: '8px', backgroundColor: '#f0f0f0'}}/>
-     <button onClick={handleClick}>Start a post</button>
-     </div>
-   
-    <div>
-     <button><FaImage size={20} color="#70b5f9"/> <span>Photo</span></button>
-      <button><FaVideo size={20} color="#2aa732"/> <span>Video</span></button>
-      <button><FaCalendarAlt size={20} color="#f59e0b"/> <span>Event</span></button>
-      <button><FaEdit size={20} color="#ef4444"/> <span>Write article</span></button>
-    </div>
-    </ShareBox>
-    <div>
-      <Article>
-        <SharedActor>
-          <a>
-           <FaUser size={48} color="#666" style={{borderRadius: '50%', padding: '8px', backgroundColor: '#f0f0f0'}}/>
-          <div>
-            <span>John Doe</span>
-            <span>Software Engineer at TechCorp</span>
-            <span>1d • <FaGlobeAmericas /></span>
-          </div>
-          </a>
-          <button>•••</button>
-        </SharedActor>
-       <Description>
-  🚀 Exciting news in the crypto space! Bitcoin just hit a new monthly high, and institutional adoption continues to grow. 
-  
-  Key highlights from this week:
-  • MicroStrategy adds another 5,000 BTC to their treasury 
-  • Major banks are now offering crypto custody services
-  • DeFi protocols see 40% increase in TVL
-  
-  The future of finance is becoming more decentralized every day. What are your thoughts on the current market trends? 
-  
-  #Bitcoin #Cryptocurrency #DeFi #Blockchain #FinTech #Investment
-</Description>
-<SharedImg>
-  <a>
-    <img src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=500&h=300&fit=crop&crop=center" alt="Bitcoin and cryptocurrency trading chart" />
-  </a>
-</SharedImg>
-<SocialCount>
-  <li>
-    <button>
-      <img src="https://static-exp1.licdn.com/sc/h/8ekq8gho1ruaf8i7f86vd1ftt" alt="Like icon" />
-      <img src="/images/clapping.svg" alt="Clap icon" />
-      <span>75</span>
-    </button>
-  </li>
-  <li>
-    <a>24 comments</a>
-  </li>
-</SocialCount>
-<SocialActions>
-  <button>
-  <FaThumbsUp size={16} color="#666" /> Like
-</button>
-<button>
-  <FaComment size={16} color="#666" /> Comment  
-</button>
-<button>
-  <FaRetweet size={16} color="#666" /> Repost
-</button>
-<button>
-  <FaShare size={16} color="#666" /> Share
-</button>
-</SocialActions>
-  </Article>
-    </div>
-    <PostModal showModal={showModal} handleClick={handleClick}/>
-  </Container>;
-  
+  return (
+    <Container>
+      <ShareBox>
+        <div>
+          {props.user ? (
+            <img 
+              src={props.user.photoURL || props.user.picture || '/images/user.svg'} 
+              alt="User" 
+              onError={(e) => {
+                e.target.src = '/images/user.svg';
+              }}
+            />
+          ) : (
+            <div className="user-icon">
+              <FaUser size={24} color="#666" />
+            </div>
+          )}
+          <button 
+            onClick={handleClick} 
+            disabled={props.loading}
+          >
+            Start a post
+          </button>
+        </div>
+       
+        <div>
+          <button>
+            <FaImage size={20} color="#70b5f9" /> 
+            <span>Photo</span>
+          </button>
+          <button>
+            <FaVideo size={20} color="#2aa732" /> 
+            <span>Video</span>
+          </button>
+          <button>
+            <FaCalendarAlt size={20} color="#f59e0b" /> 
+            <span>Event</span>
+          </button>
+          <button>
+            <FaEdit size={20} color="#ef4444" /> 
+            <span>Write article</span>
+          </button>
+        </div>
+      </ShareBox>
+      
+      <Content>
+        {props.loading && <img src="/images/spinner.svg" alt="Loading" />}
+        {dummyPosts && dummyPosts.length > 0 && dummyPosts.map(post => (
+          <Article key={post.id}>
+            <SharedActor>
+              <a>
+                <img src={post.actor.image} alt={post.actor.name} />
+                <div>
+                  <span>{post.actor.name}</span>
+                  <span>{post.actor.title}</span>
+                  <span>{post.actor.time} • <FaGlobeAmericas /></span>
+                </div>
+              </a>
+              <button>•••</button>
+            </SharedActor>
+            
+            <Description>
+              {post.description}
+            </Description>
+            
+            {post.sharedImg && (
+              <SharedImg>
+                <a>
+                  <img src={post.sharedImg} alt="Post content" />
+                </a>
+              </SharedImg>
+            )}
+            
+            <SocialCount>
+              <li>
+                <button>
+                  <img src="https://static-exp1.licdn.com/sc/h/8ekq8gho1ruaf8i7f86vd1ftt" alt="Like icon" />
+                  <img src="/images/clapping.svg" alt="Clap icon" />
+                  <span>{post.socialCounts?.likes || 0}</span>
+                </button>
+              </li>
+              <li>
+                <a>{post.socialCounts?.comments || 0} comments</a>
+              </li>
+            </SocialCount>
+            
+            <SocialActions>
+              <button>
+                <FaThumbsUp size={16} color="#666" /> 
+                <span>Like</span>
+              </button>
+              <button>
+                <FaComment size={16} color="#666" /> 
+                <span>Comment</span>
+              </button>
+              <button>
+                <FaRetweet size={16} color="#666" /> 
+                <span>Repost</span>
+              </button>
+              <button>
+                <FaShare size={16} color="#666" /> 
+                <span>Send</span>
+              </button>
+            </SocialActions>
+          </Article>
+        ))}
+      </Content>
+      
+      <PostModal showModal={showModal} handleClick={handleClick} />
+    </Container>
+  );
 };
 
-export default Main;
+
+const mapStateToProps = (state) => {
+  return {
+    user: state.userState.user,
+    loading: state.articleState.user,
+    articles: state.articleState.articles,
+  };
+};
+
+
+const mapDispatchToProps = (dispatch) => ({
+  getArticles: () => dispatch(getArticlesAPI()),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Main);
