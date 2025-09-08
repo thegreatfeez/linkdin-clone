@@ -605,7 +605,7 @@ const Main = (props) => {
       avatar: props.user?.photoURL || props.user?.picture || '/images/user.svg',
       text: commentText.trim(),
       time: 'Just now',
-      isOwn: true // Mark as user's own comment so they can delete it
+      isOwn: true 
     };
 
     setPostStates(prev => ({
